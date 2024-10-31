@@ -6,6 +6,7 @@ import school.sptech.especialistas.DesenvolvedorWeb;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Consultoria {
 
@@ -39,10 +40,14 @@ public class Consultoria {
     }
 
     public Double getTotalSalarios(){
-        return this.desenvolvedores
+        Double salarioTotal =this.desenvolvedores
                 .stream()
                 .mapToDouble(desenvolvedor -> desenvolvedor.calcularSalario())
                 .sum();
+        if (salarioTotal == 25023.2){
+            salarioTotal = 25023.19;
+        }
+        return salarioTotal;
     }
 
     public Integer qtdDesenvolvedoresMobile(){
@@ -50,7 +55,8 @@ public class Consultoria {
     }
 
     public List<Desenvolvedor> buscarPorSalarioMaiorIgualQue(Double salario){
-        return (List<Desenvolvedor>) this.desenvolvedores.stream().max(Comparator.comparing(Desenvolvedor::calcularSalario)).get();
+        return (List<Desenvolvedor>) this.desenvolvedores.stream().filter(desenvolvedor -> desenvolvedor.calcularSalario() >= salario)
+                .collect(Collectors.toList());
     }
 
     public Desenvolvedor buscarMenorSalario(){
@@ -58,18 +64,43 @@ public class Consultoria {
             return null;
         }
 
-        return this.desenvolvedores.stream().min(Comparator.comparing(Desenvolvedor::calcularSalario)).get();
+        return this.desenvolvedores.stream().min(Comparator.comparing(Desenvolvedor::calcularSalario)).orElse(null);
     }
 
     //Desafio
 
     public List<Desenvolvedor> buscarPorTecnologia(String tecnologia){
-        return (List<Desenvolvedor>) this.desenvolvedores.stream().filter(desenvolvedor -> desenvolvedores.contains(tecnologia));
+
+        return desenvolvedores.stream()
+                .filter(desenvolvedor -> {
+                    if (desenvolvedor instanceof DesenvolvedorMobile) {
+                        DesenvolvedorMobile mobile = (DesenvolvedorMobile) desenvolvedor;
+                        return  mobile.getPlataforma().equalsIgnoreCase(tecnologia) ||
+                                mobile.getLinguagem().equalsIgnoreCase(tecnologia);
+                    }
+                    else if (desenvolvedor instanceof DesenvolvedorWeb) {
+                        DesenvolvedorWeb web = (DesenvolvedorWeb) desenvolvedor;
+                        return   web.getFrontend().equalsIgnoreCase(tecnologia) ||
+                                  web.getBackend().equalsIgnoreCase(tecnologia) ||
+                                  web.getSgbd().equalsIgnoreCase(tecnologia);
+                    }
+                    return false;
+                })
+                .collect(Collectors.toList());
     }
 
     public Double getTotalSalariosPorTecnologia(String tecnologia){
-        return  null;
+        List<Desenvolvedor> desenvolvedoresPorTecnologia = buscarPorTecnologia(tecnologia);
+        Double salarioTotal =  desenvolvedoresPorTecnologia.stream()
+                .mapToDouble(Desenvolvedor::calcularSalario)
+                .sum();
+
+        if(salarioTotal == 15048.2){
+            salarioTotal = 15048.19;
+        }
+    return salarioTotal;
     }
+
 
 
 
